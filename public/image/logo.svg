@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 书本形状 -->
+  <path d="M156 156
+           L356 156
+           L356 356
+           L156 356
+           Z" 
+        fill="none"
+        stroke="url(#glow-border)"
+        stroke-width="12"
+        filter="url(#neon-glow)"/>
+  
+  <!-- AI文字 -->
+  <path d="M206 216
+           L256 316
+           L306 216
+           M196 336
+           L316 336" 
+        stroke="url(#glow-text)"
+        stroke-width="16"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        filter="url(#neon-glow)"/>
+  
+  <!-- 滤镜和渐变定义 -->
+  <defs>
+    <!-- 霓虹发光效果 -->
+    <filter id="neon-glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- 边框渐变 -->
+    <linearGradient id="glow-border" x1="156" y1="156" x2="356" y2="356">
+      <stop offset="0%" stop-color="#00ffff"/>
+      <stop offset="100%" stop-color="#ff00ff"/>
+    </linearGradient>
+    
+    <!-- 文字渐变 -->
+    <linearGradient id="glow-text" x1="196" y1="216" x2="316" y2="336">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#00ffff"/>
+    </linearGradient>
+  </defs>
+</svg>
