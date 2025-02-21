@@ -11,6 +11,7 @@ export default defineConfig({
     }
   },
   server: {
+    port: 8080,
     // 允许的主机列表
     allowedHosts: [
       'hqlpjh.ziyi-233.top',
