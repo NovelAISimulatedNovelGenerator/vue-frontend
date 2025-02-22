@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from '../api'
 import { NInput, NForm, NFormItem } from 'naive-ui'
+import WaterBackground from '../components/WaterBackground.vue'
 
 // 状态管理
 const router = useRouter()
@@ -39,10 +40,10 @@ const handleSubmit = async () => {
       // 触发登录成功动画
       loginSuccess.value = true
       
-      // 等待动画完成后跳转
+      // 延长等待时间以匹配新的动画效果
       setTimeout(() => {
         router.push('/archive')
-      }, 2000)
+      }, 2000) // 增加到2秒，让动画完整播放
     } else {
       if (form.value.password !== form.value.confirmPassword) {
         alert('两次密码不一致')
@@ -59,80 +60,12 @@ const handleSubmit = async () => {
     }
   }
 }
-
-// 数字雨效果
-onMounted(() => {
-  const canvas = document.querySelector('canvas')
-  const ctx = canvas?.getContext('2d')
-  if (!canvas || !ctx) return
-
-  const resize = () => {
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
-  }
-  window.addEventListener('resize', resize)
-  resize()
-  //ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃ0123456789
-  const chars = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃ0123456789'
-  const columns = canvas.width / 20
-  const drops: number[] = []
-  let speed = 1
-  let fontSize = 15
-  let depth = 1
-
-  for (let i = 0; i < columns; i++) {
-    drops[i] = Math.floor(Math.random() * -100)
-  }
-
-  const draw = () => {
-    ctx.fillStyle = `rgba(0, 0, 0, ${loginSuccess.value ? 0.1 : 0.05})`
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-    
-    ctx.fillStyle = loginSuccess.value ? '#0F0' : '#0F0'
-    ctx.font = `${fontSize}px monospace`
-    
-    for (let i = 0; i < drops.length; i++) {
-      const char = chars[Math.floor(Math.random() * chars.length)]
-      const x = i * 20
-      const y = drops[i] * 20
-      
-      // 3D效果
-      if (loginSuccess.value) {
-        const scale = (y / canvas.height + 0.5) * depth
-        fontSize = 15 * scale
-        ctx.font = `${fontSize}px monospace`
-        ctx.fillStyle = `rgba(0, 255, 0, ${scale})`
-        
-        // 透视效果
-        const perspectiveX = (x - canvas.width / 2) * scale + canvas.width / 2
-        ctx.fillText(char, perspectiveX, y)
-      } else {
-        ctx.fillText(char, x, y)
-      }
-      
-      if (drops[i] * 20 > canvas.height && Math.random() > 0.975) {
-        drops[i] = 0
-      }
-      drops[i] += speed
-    }
-    
-    // 登录成功后加速
-    if (loginSuccess.value) {
-      speed = Math.min(speed + 0.1, 5)
-      depth = Math.min(depth + 0.1, 3)
-    }
-    
-    requestAnimationFrame(draw)
-  }
-
-  draw()
-})
 </script>
 
 <template>
   <div class="login-container" :class="{ 'login-success': loginSuccess }">
-    <!-- 数字雨背景 -->
-    <canvas ref="matrixCanvas" class="matrix-bg" :class="{ 'matrix-zoom': loginSuccess }"></canvas>
+    <!-- 动态背景 -->
+    <WaterBackground :login-success="loginSuccess" />
 
     <!-- 登录卡片 -->
     <div class="cyber-box" :class="{ 'fade-out': loginSuccess }">
@@ -281,19 +214,7 @@ onMounted(() => {
 
 .login-container.login-success {
   background: black;
-}
-
-/* 数字雨背景 */
-.matrix-bg {
-  position: fixed;
-  inset: 0;
-  opacity: 0.3;
-  transition: all 2s cubic-bezier(0.4, 0, 0.2, 1);
-  transform-origin: center center;
-}
-
-.matrix-zoom {
-  transform: translateZ(1000px) scale(2);
+  transition: all 2s ease-out;
 }
 
 /* 登录卡片 */
@@ -301,7 +222,7 @@ onMounted(() => {
   width: 1000px;
   height: 600px;
   position: relative;
-  background: var(--panel-bg);
+  background: rgba(16, 10, 39, 0.9); /* 稍微增加不透明度 */
   backdrop-filter: blur(10px);
   clip-path: polygon(
     0 20px, 
@@ -314,12 +235,13 @@ onMounted(() => {
     0 calc(100% - 20px)
   );
   overflow: hidden;
+  z-index: 1; /* 确保登录框在背景上层 */
 }
 
 .fade-out {
   opacity: 0;
-  transform: scale(0.8) translateZ(-500px);
-  transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scale(0.9);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* 霓虹边框 */
@@ -455,7 +377,7 @@ onMounted(() => {
   transform: rotateY(10deg);
 }
 
-.form-panel h2 {
+.form-panel.h2 {
   color: var(--cyber-blue);
   font-size: 1.5em;
   margin-bottom: 40px;
