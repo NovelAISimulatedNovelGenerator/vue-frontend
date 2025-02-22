@@ -9,14 +9,18 @@ const props = defineProps<{
 }>()
 
 const container = ref<HTMLDivElement>()
-let camera: THREE.PerspectiveCamera
-let controls: OrbitControls
+let scene: THREE.Scene | null = null
+let renderer: THREE.WebGLRenderer | null = null
+let camera: THREE.PerspectiveCamera | null = null
+let controls: OrbitControls | null = null
+let water: THREE.Mesh | null = null
+let animationFrameId: number | null = null
 
 onMounted(() => {
   if (!container.value) return
   
   // 初始化Three.js场景
-  const scene = new THREE.Scene()
+  scene = new THREE.Scene()
   scene.fog = new THREE.Fog('#8e99a2', 1, 8)
   scene.background = new THREE.Color('#8e99a2')
 
@@ -178,75 +182,81 @@ void main() {
     }
   })
 
-  const water = new THREE.Mesh(waterGeometry, waterMaterial)
+  water = new THREE.Mesh(waterGeometry, waterMaterial)
   water.rotation.x = -Math.PI * 0.5
   scene.add(water)
 
-  // 相机设置
+  // 相机设置 - 使用正常视角
   camera = new THREE.PerspectiveCamera(
     75,
     container.value.clientWidth / container.value.clientHeight,
     0.1,
     100
   )
-  camera.position.set(1, 1, 1)
+  camera.position.set(1, 1, 1) // 保持原来的初始位置
   scene.add(camera)
 
   // 渲染器设置
-  const renderer = new THREE.WebGLRenderer({ alpha: true })
+  renderer = new THREE.WebGLRenderer({ alpha: true })
   renderer.setSize(container.value.clientWidth, container.value.clientHeight)
   renderer.setClearAlpha(0)
   container.value.appendChild(renderer.domElement)
 
-  // 控制器
+  // 控制器设置
   controls = new OrbitControls(camera, renderer.domElement)
   controls.enableDamping = true
-  controls.enabled = true // 启用交互
-  controls.enableZoom = true // 允许缩放
-  controls.enablePan = true // 允许平移
-  controls.autoRotate = true // 自动旋转
-  controls.autoRotateSpeed = 0.5 // 旋转速度
+  controls.enabled = true
+  controls.enableZoom = true
+  controls.enablePan = true
+  controls.autoRotate = true
+  controls.autoRotateSpeed = 0.5
+  controls.target.set(0, 0, 0)
   
-  // 在登录成功时禁用交互并执行潜入动画
+  // 登录成功动画
   watch(() => props.loginSuccess, (newValue) => {
     if (newValue) {
-      // 禁用控制器
       controls.enabled = false
       controls.autoRotate = false
       
-      // 获取当前相机位置作为起点
-      const startPosition = camera.position.clone()
+      const currentPos = camera.position.clone()
       
-      // 计算目标位置 - 从当前位置向下潜入并稍微前倾
-      const targetPosition = {
-        x: startPosition.x , // 略微保持一些水平位移
-        y: 0.1, // 潜入水下
-        z: startPosition.z - 2 // 向前推进
-      }
-      
-      // 相机动画
-      gsap.to(camera.position, {
-        x: targetPosition.x,
-        y: targetPosition.y,
-        z: targetPosition.z,
-        duration: 2.0,
-        ease: "power2.in" // 使用 in 缓动让潜入感更强
-      })
-      
-      // 同时调整相机朝向，略微上仰
+      // 构建贝塞尔曲线动画
+      gsap.timeline()
+        // 1. 缓慢上升并稍微后移，为俯冲做准备
+        .to(camera.position, {
+          x: currentPos.x * 0.5,
+          y: 1,
+          z: currentPos.z + 1,
+          duration: 0.8,
+          ease: "power1.inOut"
+        })
+        // 2. 暂停一个很短的时间
+        .to({}, {
+          duration: 0.1
+        })
+        // 3. 快速俯冲，使用自定义缓动函数让动作更有力量感
+        .to(camera.position, {
+          x: 0,
+          y: 0.2,
+          z: -3,
+          duration: 1.4,
+          ease: "power3.in"
+        }, ">=0")
+        
+      // 视角跟随，但比位移稍慢一些，造成视角拉伸感
       gsap.to(controls.target, {
         x: 0,
-        y: 1, // 向上看一点，能看到海面
-        z: -2, // 前方
-        duration: 2.0,
-        ease: "power2.in"
+        y: 0,
+        z: -7,
+        duration: 1.8,
+        ease: "power2.inOut"
       })
 
-      // 可以选择性添加相机旋转
+      // 添加相机俯仰角度的微调
       gsap.to(camera.rotation, {
-        x: THREE.MathUtils.degToRad(-15), // 略微上仰15度
-        duration: 2.0,
-        ease: "power2.in"
+        x: THREE.MathUtils.degToRad(-5),
+        duration: 2,
+        ease: "power2.inOut"
       })
     }
   })
@@ -267,14 +277,53 @@ void main() {
     waterMaterial.uniforms.uTime.value = elapsedTime
     controls.update()
     renderer.render(scene, camera)
-    requestAnimationFrame(animate)
+    animationFrameId = requestAnimationFrame(animate)
   }
   animate()
 
   // 清理
   onBeforeUnmount(() => {
-    window.removeEventListener('resize', handleResize)
-    renderer.dispose()
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId)
+    }
+    
+    // 清理controls
+    if (controls) {
+      controls.dispose()
+      controls = null
+    }
+  
+    // 清理water材质和几何体
+    if (water) {
+      water.geometry.dispose()
+      ;(water.material as THREE.ShaderMaterial).dispose()
+      water = null
+    }
+  
+    // 清理renderer
+    if (renderer) {
+      renderer.dispose()
+      renderer.forceContextLoss()
+      renderer.domElement.remove()
+      renderer = null
+    }
+  
+    // 清理scene
+    if (scene) {
+      scene.traverse((object) => {
+        if (object instanceof THREE.Mesh) {
+          object.geometry.dispose()
+          ;(object.material as THREE.Material).dispose()
+        }
+      })
+      scene = null
+    }
+  
+    // 清理camera
+    camera = null
+  
+    // 手动触发垃圾回收
+    window.gc?.()
   })
 })
 </script>

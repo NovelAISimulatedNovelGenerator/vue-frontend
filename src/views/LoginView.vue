@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from '../api'
-import { NInput, NForm, NFormItem } from 'naive-ui'
-import WaterBackground from '../components/WaterBackground.vue'
+import { NInput, NForm, NFormItem, NButton, NTooltip } from 'naive-ui'
+
+// 将WaterBackground改为异步组件
+const WaterBackground = defineAsyncComponent(() => 
+  import('../components/WaterBackground.vue')
+)
 
 // 状态管理
 const router = useRouter()
@@ -14,6 +18,31 @@ const form = ref({
   username: '',
   password: '',
   confirmPassword: ''
+})
+
+// 优化显示状态控制逻辑
+const showLoginContainer = ref(true) // 默认不加载3D背景
+
+// 切换显示状态并保存到localStorage
+const toggleLoginContainer = () => {
+  showLoginContainer.value = !showLoginContainer.value
+  localStorage.setItem('showLoginContainer', String(showLoginContainer.value))
+  
+  // 如果关闭3D背景，手动触发垃圾回收
+  if (!showLoginContainer.value) {
+    setTimeout(() => {
+      window.gc?.()
+    }, 100)
+  }
+}
+
+// 初始化时从localStorage读取状态
+onMounted(() => {
+  const saved = localStorage.getItem('showLoginContainer')
+  // 仅当明确设置为 'true' 时才加载3D背景
+  if (saved === 'true') {
+    showLoginContainer.value = true
+  }
 })
 
 // 切换表单
@@ -43,7 +72,7 @@ const handleSubmit = async () => {
       // 延长等待时间以匹配新的动画效果
       setTimeout(() => {
         router.push('/archive')
-      }, 2000) // 增加到2秒，让动画完整播放
+      }, 2300) // 增加到2秒，让动画完整播放
     } else {
       if (form.value.password !== form.value.confirmPassword) {
         alert('两次密码不一致')
@@ -63,11 +92,155 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <div class="login-container" :class="{ 'login-success': loginSuccess }">
+  <!-- 切换按钮 -->
+  <div class="toggle-container">
+    <n-tooltip trigger="hover" placement="left">
+      <template #trigger>
+        <n-button 
+          quaternary 
+          circle 
+          class="toggle-button"
+          :type="showLoginContainer ? 'info' : 'warning'"
+          @click="toggleLoginContainer"
+        >
+          <template #icon>
+            <div class="icon" :class="{ active: showLoginContainer }">
+              {{ showLoginContainer ? '⚡' : '💤' }}
+            </div>
+          </template>
+        </n-button>
+      </template>
+      {{ showLoginContainer ? '点击关闭动态背景' : '点击开启动态背景' }}
+    </n-tooltip>
+  </div>
+
+  <!-- 登录容器 -->
+  <div v-if="showLoginContainer" class="login-container" :class="{ 'login-success': loginSuccess }">
     <!-- 动态背景 -->
     <WaterBackground :login-success="loginSuccess" />
 
     <!-- 登录卡片 -->
+    <div class="cyber-box" :class="{ 'fade-out': loginSuccess }">
+      <!-- 霓虹边框 -->
+      <div class="neon-border"></div>
+      
+      <!-- 内容区域 -->
+      <div class="content-wrapper">
+        <!-- 品牌展示区 -->
+        <div class="brand-panel" :class="{ 'switch': !isLogin }">
+          <div class="cyber-circle">
+            <div class="ring"></div>
+            <div class="core"></div>
+            <div class="scan-line"></div>
+          </div>
+          <h1 class="glitch-text">妄想模拟器</h1>
+          <p class="cyber-text">{{ isLogin ? 'AI驱动的虚构世界' : '创建虚拟身份' }}</p>
+        </div>
+
+        <!-- 表单区域 -->
+        <div class="form-panel" :class="{ 'register': !isLogin }">
+          <div class="form-content">
+            <h2>{{ isLogin ? 'SYSTEM LOGIN' : 'IDENTITY CREATE' }}</h2>
+            
+            <div class="input-group">
+              <n-form class="cyber-form">
+                <n-form-item 
+                  label="用户标识"
+                  :theme-overrides="{
+                    labelTextColor: '#fff',
+                    labelFontWeight: '600'
+                  }"
+                >
+                  <n-input
+                    v-model:value="form.username"
+                    :disabled="loading"
+                    placeholder="请输入用户标识"
+                    type="text"
+                    required
+                    class="cyber-input"
+                    :theme-overrides="{
+                      textColor: '#fff',
+                      placeholderColor: 'rgba(0, 255, 249, 0.4)',
+                      colorFocus: 'var(--cyber-blue)',
+                      borderFocus: '1px solid var(--cyber-blue)',
+                      boxShadowFocus: '0 0 10px rgba(0, 255, 249, 0.4)'
+                    }"
+                  />
+                </n-form-item>
+
+                <n-form-item 
+                  label="访问密钥"
+                  :theme-overrides="{
+                    labelTextColor: '#fff',
+                    labelFontWeight: '600'
+                  }"
+                >
+                  <n-input
+                    v-model:value="form.password"
+                    :disabled="loading"
+                    placeholder="请输入访问密钥"
+                    type="password"
+                    required
+                    class="cyber-input"
+                    :theme-overrides="{
+                      textColor: '#fff',
+                      placeholderColor: 'rgba(0, 255, 249, 0.4)',
+                      colorFocus: 'var(--cyber-blue)',
+                      borderFocus: '1px solid var(--cyber-blue)',
+                      boxShadowFocus: '0 0 10px rgba(0, 255, 249, 0.4)'
+                    }"
+                  />
+                </n-form-item>
+
+                <n-form-item 
+                  v-if="!isLogin" 
+                  label="确认密钥"
+                  :theme-overrides="{
+                    labelTextColor: '#fff',
+                    labelFontWeight: '600'
+                  }"
+                >
+                  <n-input
+                    v-model:value="form.confirmPassword"
+                    :disabled="loading"
+                    placeholder="请确认访问密钥"
+                    type="password"
+                    required
+                    class="cyber-input"
+                    :theme-overrides="{
+                      textColor: '#fff',
+                      placeholderColor: 'rgba(0, 255, 249, 0.4)',
+                      colorFocus: 'var(--cyber-blue)',
+                      borderFocus: '1px solid var(--cyber-blue)',
+                      boxShadowFocus: '0 0 10px rgba(0, 255, 249, 0.4)'
+                    }"
+                  />
+                </n-form-item>
+              </n-form>
+            </div>
+
+            <div class="button-group">
+              <button 
+                class="cyber-button" 
+                @click="handleSubmit"
+                :disabled="loading"
+              >
+                <span class="btn-text">{{ loading ? '验证中...' : (isLogin ? '接入系统' : '确认创建') }}</span>
+                <span class="btn-glitch"></span>
+              </button>
+              
+              <div class="cyber-link" @click="handleToggle">
+                <span>{{ isLogin ? '注册新身份' : '返回登录' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 静态背景 -->
+  <div v-else class="static-container">
     <div class="cyber-box" :class="{ 'fade-out': loginSuccess }">
       <!-- 霓虹边框 -->
       <div class="neon-border"></div>
@@ -222,7 +395,7 @@ const handleSubmit = async () => {
   width: 1000px;
   height: 600px;
   position: relative;
-  background: rgba(16, 10, 39, 0.9); /* 稍微增加不透明度 */
+  background: rgba(16, 10, 39, 0.7); /* 稍微增加不透明度 */
   backdrop-filter: blur(10px);
   clip-path: polygon(
     0 20px, 
@@ -757,5 +930,69 @@ const handleSubmit = async () => {
   .button-group {
     gap: 8px;
   }
+}
+
+/* 切换按钮样式 */
+.toggle-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+}
+
+.toggle-button {
+  background: rgba(16, 10, 39, 0.8) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--cyber-blue) !important;
+  box-shadow: 0 0 10px rgba(0, 255, 249, 0.2);
+  transition: all 0.3s ease;
+}
+
+.toggle-button:hover {
+  border-color: var(--cyber-pink) !important;
+  box-shadow: 0 0 15px rgba(255, 42, 109, 0.3);
+  transform: scale(1.05);
+}
+
+.icon {
+  font-size: 18px;
+  transition: all 0.3s ease;
+  opacity: 0.8;
+}
+
+.icon.active {
+  animation: pulse 2s infinite;
+}
+
+/* 静态背景 */
+.static-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: url('/image/hq.jpg') center/cover no-repeat fixed;
+  padding: 20px;
+  position: relative;
+}
+
+.static-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* 确保内容在遮罩上层 */
+.static-container .cyber-box {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 0.8; transform: scale(1); }
 }
 </style>
