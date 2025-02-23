@@ -128,11 +128,6 @@ const handleSubmit = async () => {
       <div class="content-wrapper">
         <!-- 品牌展示区 -->
         <div class="brand-panel" :class="{ 'switch': !isLogin }">
-          <div class="cyber-circle">
-            <div class="ring"></div>
-            <div class="core"></div>
-            <div class="scan-line"></div>
-          </div>
           <h1 class="glitch-text">妄想模拟器</h1>
           <p class="cyber-text">{{ isLogin ? 'AI驱动的虚构世界' : '创建虚拟身份' }}</p>
         </div>
@@ -249,11 +244,6 @@ const handleSubmit = async () => {
       <div class="content-wrapper">
         <!-- 品牌展示区 -->
         <div class="brand-panel" :class="{ 'switch': !isLogin }">
-          <div class="cyber-circle">
-            <div class="ring"></div>
-            <div class="core"></div>
-            <div class="scan-line"></div>
-          </div>
           <h1 class="glitch-text">妄想模拟器</h1>
           <p class="cyber-text">{{ isLogin ? 'AI驱动的虚构世界' : '创建虚拟身份' }}</p>
         </div>
@@ -470,50 +460,6 @@ const handleSubmit = async () => {
   clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%);
 }
 
-/* 赛博朋克圆环 */
-.cyber-circle {
-  width: 200px;
-  height: 200px;
-  position: relative;
-  margin-bottom: 30px;
-}
-
-.ring {
-  position: absolute;
-  inset: 0;
-  border: 2px solid transparent;
-  border-top: 2px solid var(--cyber-blue);
-  border-right: 2px solid var(--cyber-pink);
-  border-radius: 50%;
-  animation: rotate 20s linear infinite;
-}
-
-.core {
-  position: absolute;
-  inset: 45%;
-  background: radial-gradient(
-    circle at center,
-    var(--cyber-blue),
-    var(--cyber-pink)
-  );
-  border-radius: 50%;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-.scan-line {
-  position: absolute;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--cyber-blue),
-    transparent
-  );
-  top: 50%;
-  animation: scan 2s linear infinite;
-}
-
 /* 品牌文字 */
 .glitch-text {
   font-size: 2.5em;
@@ -724,36 +670,6 @@ const handleSubmit = async () => {
   }
 }
 
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .cyber-box {
-    width: 100%;
-    max-width: 400px;
-    height: auto;
-    min-height: 600px;
-  }
-
-  .brand-panel {
-    width: 100%;
-    height: 100%;
-    clip-path: none;
-  }
-
-  .brand-panel.switch {
-    transform: translateY(-100%);
-    clip-path: none;
-  }
-
-  .form-panel {
-    margin: 0;
-    padding: 20px;
-  }
-
-  .form-panel.register {
-    margin: 0;
-  }
-}
-
 /* 移动端适配 */
 @media screen and (max-width: 1024px) {
   .login-box {
@@ -782,12 +698,6 @@ const handleSubmit = async () => {
       transform: translateY(-100%);
       clip-path: polygon(0 10%, 100% 0, 100% 100%, 0 100%);
     }
-  }
-
-  .cyber-circle {
-    width: min(120px, 25vw);
-    height: min(120px, 25vw);
-    margin-bottom: 15px;
   }
 
   .glitch-text {
@@ -850,85 +760,6 @@ const handleSubmit = async () => {
         margin-right: 0;
       }
     }
-  }
-}
-
-/* 超小屏幕适配 */
-@media screen and (max-width: 480px) {
-  .login-box {
-    width: 95%;
-    height: min(95vh, 600px);
-    margin: 10px auto;
-  }
-
-  .brand-panel {
-    height: 30%;
-    min-height: 180px;
-    padding: 15px;
-  }
-
-  .form-panel {
-    height: 70%;
-    padding: 15px;
-  }
-
-  .cyber-form {
-    :deep(.n-form-item) {
-      margin-bottom: 12px;
-      
-      .n-form-item-label {
-        font-size: 14px;
-        padding-bottom: 4px;
-      }
-    }
-
-    :deep(.n-input) {
-      .n-input__input-el {
-        font-size: 14px;
-        height: 36px;
-      }
-    }
-  }
-}
-
-/* 横屏适配 */
-@media screen and (max-width: 1024px) and (orientation: landscape) {
-  .login-box {
-    height: min(90vh, 450px);
-  }
-
-  .brand-panel {
-    height: 40%;
-    min-height: 150px;
-    padding: 10px;
-  }
-
-  .form-panel {
-    height: 60%;
-    padding: 12px;
-
-    h2 {
-      margin-bottom: 10px;
-    }
-  }
-
-  .cyber-circle {
-    width: min(80px, 15vh);
-    height: min(80px, 15vh);
-    margin-bottom: 8px;
-  }
-
-  .glitch-text {
-    font-size: clamp(1.2em, 4vh, 1.6em);
-  }
-
-  .cyber-text {
-    font-size: 0.9em;
-    margin-top: 5px;
-  }
-
-  .button-group {
-    gap: 8px;
   }
 }
 
