@@ -237,33 +237,60 @@ onMounted(() => {
 </template>
 
 <style scoped>
+:root {
+  --cyber-blue: #00fff9;
+  --cyber-pink: #ff2a6d;
+  --cyber-blue-glow: rgba(0, 255, 249, 0.3);
+  --cyber-pink-glow: rgba(255, 42, 109, 0.3);
+  --cyber-bg: rgba(16, 10, 39, 0.85);
+  --cyber-border: rgba(0, 255, 249, 0.3);
+}
+
 .m-cyber-box {
-  width: min(92%, 450px);
-  height: min(70vh, 580px); /* 固定高度 */
-  background: rgba(16, 10, 39, 0.85);
-  backdrop-filter: blur(10px);
-  border-radius: 14px; /* 稍微减小圆角 */
-  border: 1px solid rgba(0, 255, 249, 0.3);
-  box-shadow: 0 0 20px rgba(0, 255, 249, 0.1);
-  padding: 20px;
+  width: min(92%, 420px);
+  height: auto;
+  min-height: min(85vh, 560px);
+  background: var(--cyber-bg);
+  backdrop-filter: blur(15px);
+  border-radius: 16px;
+  border: 1px solid var(--cyber-border);
+  box-shadow: 0 0 20px rgba(0, 255, 249, 0.15), inset 0 0 3px rgba(255, 42, 109, 0.3);
+  padding: 0;
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
   transform-origin: center center;
+  transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
 .m-brand-panel {
-  margin: -20px -20px 0;
-  padding: 20px;
+  padding: 24px 20px;
   background: linear-gradient(135deg,
-    rgba(0, 255, 249, 0.1),
-    rgba(255, 42, 109, 0.1)
+    rgba(0, 255, 249, 0.12),
+    rgba(255, 42, 109, 0.12)
   );
   position: relative;
   z-index: 2;
   will-change: transform;
-  transform: translate3d(0, 0, 0); /* 启用硬件加速 */
+  transform: translate3d(0, 0, 0);
+  border-bottom: 1px solid rgba(0, 255, 249, 0.15);
+}
+
+.m-brand-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 5%,
+    var(--cyber-blue) 50%,
+    transparent 95%
+  );
+  opacity: 0.6;
+  box-shadow: 0 0 10px var(--cyber-blue-glow);
 }
 
 .m-brand-panel.hide {
@@ -271,112 +298,89 @@ onMounted(() => {
   margin-bottom: -100%;
 }
 
-.m-brand-panel.switching {
-  transition-delay: 0.05s;
-}
-
 .m-brand-content {
   text-align: center;
-  backface-visibility: hidden; /* 防止3D转换时的闪烁 */
+  backface-visibility: hidden;
   perspective: 1000px;
 }
 
 .m-title {
-  font-size: clamp(1.6em, 6vw, 2em); /* 减小字体 */
-  margin-bottom: 6px; /* 减小间距 */
+  font-size: clamp(1.6em, 6vw, 2em);
+  margin-bottom: 6px;
   color: #fff;
   text-align: center;
-  text-shadow: 0 0 10px var(--cyber-blue);
+  text-shadow: 0 0 10px var(--cyber-blue), 0 0 15px var(--cyber-pink);
+  letter-spacing: 1px;
+  animation: titlePulse 3s infinite alternate;
+}
+
+.m-subtitle {
+  font-size: clamp(0.9em, 3.5vw, 1em);
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 0 8px var(--cyber-blue-glow);
+  transition: all 0.3s ease;
 }
 
 .m-form-panel {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 20px 24px;
   position: relative;
   z-index: 1;
   will-change: padding;
-}
-
-.m-form-panel.register-mode {
-  padding-top: 0;
 }
 
 .m-form-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* 修改为顶部对齐 */
-  padding: 10px 0;
+  justify-content: flex-start;
+  padding: 15px 0 10px;
   will-change: transform, opacity;
 }
 
-.m-form-title {
-  font-size: 1.2em;
-  color: #fff;
-  text-align: center;
-  margin-bottom: 20px; /* 减小标题下边距 */
-  text-shadow: 0 0 10px var(--cyber-blue);
-}
-
-.expand .m-form-title {
-  transform: scale(1.1);
-  margin-bottom: 30px;
-}
-
-.m-input-group {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start; /* 修改为顶部对齐 */
-  margin-bottom: 15px; /* 减小底部间距 */
-}
-
-.expand .m-input-group {
-  justify-content: center; /* 注册时居中显示 */
-}
-
 .m-form :deep(.n-form-item) {
-  margin-bottom: 12px; /* 减小表单项间距 */
+  margin-bottom: 16px;
 }
 
 .m-form :deep(.n-form-item-label) {
-  padding-bottom: 8px;
+  padding-bottom: 6px;
 }
 
 .m-form :deep(.n-input) {
   --n-border: 1px solid rgba(0, 255, 249, 0.2);
   --n-border-hover: 1px solid var(--cyber-blue);
   --n-border-focus: 1px solid var(--cyber-blue);
-  --n-box-shadow-focus: 0 0 8px rgba(0, 255, 249, 0.3);
-  background: transparent;
+  --n-box-shadow-focus: 0 0 12px rgba(0, 255, 249, 0.3);
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
 }
 
 .m-button-group {
-  margin-top: 0; /* 移除顶部边距 */
-  padding-bottom: 8px; /* 减小底部内边距 */
+  margin-top: auto;
+  padding: 10px 0;
   display: flex;
   flex-direction: column;
-  gap: 10px; /* 减小按钮间距 */
+  gap: 12px;
   position: relative;
-  z-index: 10; /* 确保按钮组在最上层 */
+  z-index: 10;
   will-change: transform, opacity;
 }
 
 .m-submit-btn {
   width: 100%;
-  height: 44px; /* 减小按钮高度 */
+  height: 48px;
   position: relative;
   border: none;
   padding: 0;
-  border-radius: 25px;
+  border-radius: 24px;
   background: transparent;
   overflow: hidden;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
   touch-action: manipulation;
+  transition: transform 0.2s ease, filter 0.2s ease;
 }
 
 .m-btn-wrapper {
@@ -396,18 +400,36 @@ onMounted(() => {
     var(--cyber-pink)
   );
   border-radius: inherit;
+  transition: filter 0.3s ease;
+}
+
+.m-btn-bg::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  background: linear-gradient(45deg,
+    rgba(0, 255, 249, 0.15),
+    rgba(255, 42, 109, 0.15)
+  );
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.m-submit-btn:hover .m-btn-bg::before {
+  opacity: 1;
 }
 
 .m-btn-text {
   position: relative;
-  z-index: 2; /* 确保文字在背景之上 */
+  z-index: 2;
   color: #fff;
   font-size: 16px;
   font-weight: 600;
   letter-spacing: 1px;
   text-transform: uppercase;
   text-shadow: 0 0 10px rgba(0, 255, 249, 0.5);
-  pointer-events: none; /* 防止文字影响点击 */
+  pointer-events: none;
   user-select: none;
 }
 
@@ -438,8 +460,31 @@ onMounted(() => {
   width: 100%;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
   touch-action: manipulation;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+  position: relative;
+}
+
+.m-toggle-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 1px;
+  background: var(--cyber-blue);
+  transition: width 0.2s ease, background 0.2s ease;
+  opacity: 0.7;
+}
+
+.m-toggle-btn:hover::after {
+  width: 70%;
+}
+
+.m-toggle-btn:active::after {
+  background: var(--cyber-pink);
+  width: 80%;
 }
 
 .m-toggle-btn span {
@@ -449,75 +494,60 @@ onMounted(() => {
   user-select: none;
 }
 
+.m-toggle-btn:hover {
+  color: var(--cyber-blue);
+  text-shadow: 0 0 8px var(--cyber-blue-glow);
+}
+
 .m-toggle-btn:active {
   color: var(--cyber-pink);
-  text-shadow: 0 0 10px var(--cyber-pink);
+  text-shadow: 0 0 10px var(--cyber-pink-glow);
   transform: scale(0.98);
 }
 
-.m-submit-btn:disabled,
 .m-toggle-btn:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
 .fade-out {
   opacity: 0;
-  transform: translateY(10px); /* 只使用小幅度的位移 */
+  transform: translateY(10px);
 }
 
-.form-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.expand .form-visible {
-  transition-delay: 0.2s; /* 添加延迟，让移动完成后再显示 */
-}
-
-@keyframes titleGlitch {
-  0%, 100% { 
+@keyframes titlePulse {
+  0% { 
     text-shadow: 
       0 0 10px var(--cyber-blue),
       0 0 20px var(--cyber-pink);
   }
-  33% {
+  50% {
     text-shadow:
-      2px 0 10px var(--cyber-pink),
-      -2px 0 20px var(--cyber-blue);
+      0 0 15px var(--cyber-blue),
+      0 0 25px var(--cyber-pink);
   }
-  66% {
+  100% {
     text-shadow:
-      -2px 0 10px var(--cyber-blue),
-      2px 0 20px var(--cyber-pink);
+      0 0 8px var(--cyber-blue),
+      0 0 18px var(--cyber-pink);
   }
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* 添加移动端高度适配 */
+/* 屏幕高度适配 */
 @media screen and (max-height: 600px) {
   .m-cyber-box {
-    height: auto; /* 在超小屏幕上允许自适应 */
-    min-height: 500px; /* 设置最小高度 */
+    height: auto;
+    min-height: 480px;
     margin: 10px 0;
   }
   
   .m-brand-panel {
-    padding: 15px;
+    padding: 16px;
   }
   
   .m-title {
     font-size: clamp(1.4em, 5vw, 1.6em);
+    margin-bottom: 4px;
   }
   
   .m-subtitle {
@@ -525,11 +555,11 @@ onMounted(() => {
   }
   
   .m-form-panel {
-    gap: 8px;
+    padding: 15px 20px;
   }
   
-  .m-input-group {
-    margin-bottom: 10px;
+  .m-form-content {
+    padding-top: 10px;
   }
   
   .m-form :deep(.n-form-item) {
@@ -538,50 +568,87 @@ onMounted(() => {
   
   .m-button-group {
     padding-bottom: 5px;
+    gap: 8px;
   }
   
   .m-submit-btn {
-    height: 40px;
+    height: 42px;
   }
   
   .m-btn-text {
     font-size: 14px;
   }
+  
+  .m-toggle-btn {
+    padding: 8px;
+  }
 }
 
-@media screen and (max-height: 700px) {
+/* 中小屏幕高度适配 */
+@media screen and (min-height: 601px) and (max-height: 700px) {
   .m-cyber-box {
-    min-height: auto;
-    max-height: none;
+    min-height: 520px;
   }
   
   .m-brand-panel {
-    padding: 20px;
-  }
-  
-  .m-title {
-    font-size: clamp(1.5em, 5vw, 1.8em);
-  }
-  
-  .m-subtitle {
-    font-size: clamp(0.8em, 3vw, 1em);
-  }
-  
-  .m-form-panel {
-    gap: 10px;
-  }
-  
-  .m-form-title {
-    margin-bottom: 15px;
-  }
-  
-  .m-input-group {
-    margin-bottom: 15px;
-  }
-  
-  .m-form :deep(.n-form-item) {
-    margin-bottom: 12px;
+    padding: 18px;
   }
 }
 
+/* 特小屏幕适配 */
+@media screen and (max-width: 320px) {
+  .m-cyber-box {
+    width: 95%;
+    min-height: 460px;
+  }
+  
+  .m-brand-panel {
+    padding: 14px;
+  }
+  
+  .m-title {
+    font-size: 1.4em;
+  }
+  
+  .m-form-panel {
+    padding: 14px 18px;
+  }
+  
+  .m-submit-btn {
+    height: 40px;
+  }
+}
+
+/* 横屏适配 */
+@media screen and (max-height: 450px) and (orientation: landscape) {
+  .m-cyber-box {
+    min-height: 400px;
+    height: auto;
+  }
+  
+  .m-brand-panel {
+    padding: 12px;
+  }
+  
+  .m-title {
+    font-size: 1.3em;
+    margin-bottom: 2px;
+  }
+  
+  .m-subtitle {
+    font-size: 0.8em;
+  }
+  
+  .m-form-panel {
+    padding: 12px 18px;
+  }
+  
+  .m-form :deep(.n-form-item) {
+    margin-bottom: 8px;
+  }
+  
+  .m-button-group {
+    padding-top: 5px;
+  }
+}
 </style>
