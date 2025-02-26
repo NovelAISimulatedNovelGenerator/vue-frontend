@@ -8,7 +8,7 @@
     <!-- 主要内容区域 -->
     <div class="header-content">
       <!-- 头像区域 -->
-      <div class="avatar-section">
+      <div v-if="!isMobile" class="avatar-section">
         <div class="avatar-container">
           <img 
             v-if="archive?.imageUrl" 
@@ -21,8 +21,8 @@
 
       <!-- 信息区域 -->
       <div class="info-section">
-        <div class="title-row">
-          <h1 class="title">{{ archive?.title }}</h1>
+        <div >
+          <div v-if="!isMobile"><h1 class="title">{{ archive?.title }}</h1></div>
           <NButton
             quaternary
             size="tiny"
@@ -76,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { NIcon, NButton } from 'naive-ui'
 import {
   ChevronDownOutline as ChevronDownIcon,
@@ -95,6 +95,22 @@ const expandedCategories = ref(new Set<string>())
 
 // 计算是否有展开的分类
 const hasExpandedCategory = computed(() => expandedCategories.value.size > 0)
+
+// 移动设备检测
+const isMobile = ref(false)
+const checkMobile = () => {
+  isMobile.value = window.innerWidth <= 768 // 使用768px作为移动设备断点
+}
+
+// 监听窗口大小变化
+onMounted(() => {
+  checkMobile() // 初始检查
+  window.addEventListener('resize', checkMobile)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile)
+})
 
 // 计算属性：是否使用紧凑模式
 const isCompact = computed(() => {
@@ -273,7 +289,7 @@ const toggleAllCategories = () => {
 }
 
 .attribute-category {
-  min-width: 200px;
+  min-width: 150px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -400,4 +416,5 @@ const toggleAllCategories = () => {
     display: none;
   }
 }
+
 </style>
