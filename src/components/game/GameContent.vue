@@ -599,4 +599,41 @@ span {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(3px); }
 }
+
+@media (max-width: 768px) {
+  .game-content {
+  padding: 0;
+}
+  .content-container {
+    padding: 8px;
+  }
+  .controls-container {
+  position: absolute;
+  top: 20px;
+  right: -10px;
+  display: flex;
+  gap: 12px;
+  z-index: 10;
+  padding: 0 10px;
+}
+  .control-btn {
+  display: flex;
+  padding: 4px;
+  border: none;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+
+  }
+  .btn-content {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.btn-content span {
+  font-size: 0.5rem;
+  font-weight: 300;
+}
+}
 </style>

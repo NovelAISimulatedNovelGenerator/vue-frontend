@@ -188,6 +188,7 @@ const cachedAvatarStyle = computed(() => ({
   position: fixed;
   left: 0;
   top: 0;
+  padding-left: 10px;
   height: 100vh;
   background: rgba(24, 24, 28, 0.65);
   width: 240px;
@@ -476,5 +477,23 @@ const cachedAvatarStyle = computed(() => ({
 .action-btn.logout:hover {
   background: rgba(239, 68, 68, 0.15) !important;
   border-color: rgba(239, 68, 68, 0.3) !important;
+}
+@media screen and (max-width: 768px) {
+  .user-sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(124, 58, 237, 0.02) 10px,
+    rgba(124, 58, 237, 0.02) 20px
+  );
+  pointer-events: none;
+}
 }
 </style>
